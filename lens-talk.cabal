@@ -1,0 +1,33 @@
+name:               lens-talk
+version:            0.0.1
+license:            BSD3
+author:             Mark Hibberd <mark@hibberd.id.au>
+maintainer:         Mark Hibberd <mark@hibberd.id.au>
+copyright:          (c) 2012 Mark Hibberd
+synopsis:           lens-talk
+category:           Network
+homepage:           https://github.com/markhibberd/lens-talk
+bug-reports:        https://github.com/markhibberd/lens-talk
+cabal-version:      >= 1.8
+build-type:         Simple
+description:        Code for lens talk
+
+source-repository   head
+  type:             git
+  location:         https://github.com/markhibberd/lens-talk
+
+flag                small_base
+  description:      Choose the new, split-up base package.
+
+library
+  build-depends:
+                    base                            >= 3          && < 5
+                  , lens                            == 4.0.1
+
+  ghc-options:
+                    -Wall
+
+  hs-source-dirs:
+                    src
+
+  exposed-modules:
