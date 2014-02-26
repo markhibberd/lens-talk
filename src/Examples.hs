@@ -4,6 +4,10 @@ import Control.Lens
 import Control.Applicative
 import Data.Aeson
 import qualified Data.ByteString.Lazy as B
+import           Data.Digest.Pure.MD5 (md5)
+import qualified Data.ByteString.Lazy.Char8 as C8
+import qualified Data.ByteString.Base64 as B64
+
 
 -- #####################################
 -- ######## Constructing lenses ########
@@ -19,7 +23,7 @@ x :: Lens' Point Int
 x = lens _x $ \p i -> p { _x = i }
 
 y :: Lens' Point Int
-y f p = (\i -> p { _x = i}) <$> f (_x p)
+y f p = (\i -> p { _y = i}) <$> f (_y p)
 
 -- makeLenses ''Point
 
@@ -58,6 +62,13 @@ i = iso I runIdent
 -}
 
 
+md5sum :: String -> String
+md5sum = show . md5 . C8.pack
+
+-- plaintext :: (String -> Identity String) -> User -> User
+plaintext :: Setter' User String
+plaintext f u = (\p -> u { _password = md5sum p })   <$> f (u^.password)
+
 isWheel :: Int -> String -> Bool
 isWheel n s = n == 0 && s == "wheel"
 
@@ -72,7 +83,10 @@ instance HasGroup User where
 -- ########################
 -- ######## Prisms ########
 
-newtype Evens = Evens { runEvens :: Int }
+newtype Evens =
+  Evens { runEvens :: Int }
+  deriving (Show, Eq)
+
 makeIso ''Evens
 
 even' :: Prism' Int Evens
@@ -102,14 +116,3 @@ _Rectangle = iso  (\s -> case s of
 
 aeson:: (FromJSON a, ToJSON a) => Prism' B.ByteString a
 aeson  = prism' encode decode
-
-{-
-
--- >>> review aeson 5
--- "5"
--- >>> [1,2,3]^.re aeson
--- "[1,2,3]"
--- >>> aeson.both +~ 2 $ (2,3)^.re aeson
-
-
--}

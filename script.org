@@ -1,3 +1,13 @@
+* big bad library
+
+p ../lens
+find src -name \*.hs -print0 | xargs -0 wc -l | sort -n | tail -1
+find src -name \*.hs -print0 | xargs -0 fgrep data | wc -l
+find src -name \*.hs -print0 | xargs -0 fgrep class | wc -l
+find src -name \*.hs -print0 | xargs -0 fgrep instance | wc -l
+find src -name \*.hs -print0 | xargs -0 fgrep type | wc -l
+find src -name \*.hs -print0 | xargs -0 fgrep '::' | wc -l
+o
 
 * examples setup
 
@@ -9,34 +19,59 @@ ghci -package-db .cabal-sandbox/x86_64-osx-ghc-7.6.1-packages.conf.d -XOverloade
 ** Constructing a lens by hand
 ** Remove hand lenses with makeLenses
 ** view / over / set
+
 let p = Point 1 2
+
 view x p
+
 view y p
+
 set x 9 p
+
 over x (5 +) p
+
 ** operators
+
 p ^. x
+
 p ^. y
+
 :t y .~ 9
+
 (y .~ 9) p
+
 y .~ 9 $ p
+
 :t (&)
+
 :t ($)
+
 p & y .~ 9
+
 p & y %~ (+9)
+
 * composing lenses
 ** makeIso / makeLenses
 ** constructing an iso by hand
 ** creating some data
 
 let wheel = Group (I 0) "wheel"
+
 let operator = Group (I 5) "operator"
+
 let lusers = Group (I 500) "users"
+
 let root = User (I 0) "root" wheel [] "6aefd2842be62cd470709b27aedc7db7" "/bin/sh"
+
 let mth =  User (I 3365) "mth" lusers [wheel, operator] "6aefd2842be62cd470709b27aedc7db7" "/usr/local/bin/zsh"
+
 let fred = User (I 4000) "fred" lusers [] "30c6677b833454ad2df762d3c98d2409" "/bin/sh"
+
 let wilma = User (I 4001) "wilma" lusers [operator] "30c6677b833454ad2df762d3c98d2409" "/bin/sh"
+
 let users = [root, mth, fred, wilma]
+
+forM users print
 
 ** navigate around that data
 
@@ -67,6 +102,13 @@ wheel & gid . from i .~ 1 & groupname .~ "daemon"
 -- get multiple vales, Getter's form an applicative, just ((->) t)
 wheel & isWheel <$> view (gid . from i) <*> view groupname
 
+-- virtual views - setter only - maintain composition
+
+mth & plaintext .~ "apple"
+
+mth ^. plaintext
+
+
 ** classy composition (maybe don't do this, but it is interesting sometimes)
 
 mth ^?  primary . gid
@@ -74,7 +116,13 @@ mth ^?  gid
 
 (a better example might be simulating extensible records (poorly))
 
-** prims / partiality
+** basic prisms
+Left 5 ^? _Left
+Left 5 ^? _Right
+Left 5 & _Left %~ (+5)
+5^.re _Left
+
+** more prisms / partiality
 1 ^? even'
 (1, 2) & both %~ (+10)
 (1, 2) & both . even' %~ (+10)
@@ -83,25 +131,54 @@ mth ^?  gid
 ** pattern matching
 let xx = (Rectangle 5 3)
 :m + Data.Maybe
+xx ^? _Square
+xx ^? _Rectangle
+xx ^. _Rectangle
 fromMaybe (xx ^. _Rectangle)  $ xx ^? _Square
-
 
 ** printers and parsers
 review aeson (1, 2)
 preview aeson "[1, 2, 3]" :: Maybe [Int]
 
-
 * setup
 :q
-ghci -package-db .cabal-sandbox/x86_64-osx-ghc-7.6.1-packages.conf.d -XOverloadedStrings src/Js.hs
+ghci -package-db .cabal-sandbox/x86_64-osx-ghc-7.6.1-packages.conf.d  src/Js.hs
 :m + Control.Lens Control.Applicative Control.Monad Data.Char
 
-** explore
+** explore & refactor
 
-look $ \js -> js & nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn . _JSVarDecl . _1 . nn . _JSIdentifier .~ "fred"
+look "demo.js" $ \js -> js
 
-look $ \js -> js ^? nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn . _JSVarDecl . _1 . nn . _JSIdentifier
+check "demo.js" $ \js -> js
 
-check $ \js -> js & nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn . _JSVarDecl . _1 . nn . _JSIdentifier .~ "fred"
+look "demo.js" $ \js -> js ^? nn
 
-refactor $ \js -> js & nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn . _JSVarDecl . _1 . nn . _JSIdentifier .~ "roger"
+look "demo.js" $ \js -> js ^? nn . _JSSourceElementsTop
+
+look "demo.js" $ \js -> js ^? nn . _JSSourceElementsTop . _head
+
+look "demo.js" $ \js -> js ^? nn . _JSSourceElementsTop . _head . nn
+
+look "demo.js" $ \js -> js ^? nn . _JSSourceElementsTop . _head . nn . _JSVariables
+
+look "demo.js" $ \js -> js ^? nn . _JSSourceElementsTop . _head . nn . _JSVariables
+
+look "demo.js" $ \js -> js ^? nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2
+
+look "demo.js" $ \js -> js ^? nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head
+
+look "demo.js" $ \js -> js ^? nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn
+
+look "demo.js" $ \js -> js ^? nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn . _JSVarDecl
+
+look "demo.js" $ \js -> js ^? nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn . _JSVarDecl . _1
+
+look "demo.js" $ \js -> js ^? nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn . _JSVarDecl . _1 . nn
+
+look "demo.js" $ \js -> js ^? nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn . _JSVarDecl . _1 . nn . _JSIdentifier
+
+look "demo.js" $ \js -> js & nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn . _JSVarDecl . _1 . nn . _JSIdentifier .~ "fred"
+
+check "demo.js" $ \js -> js & nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn . _JSVarDecl . _1 . nn . _JSIdentifier .~ "fred"
+
+refactor "demo.js" $ \js -> js & nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn . _JSVarDecl . _1 . nn . _JSIdentifier .~ "fred"

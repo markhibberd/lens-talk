@@ -1,2 +1,2 @@
 #!/bin/sh
-cat blah.js
+cat demo.js
