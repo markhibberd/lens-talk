@@ -1,0 +1,107 @@
+
+* examples setup
+
+ghci -package-db .cabal-sandbox/x86_64-osx-ghc-7.6.1-packages.conf.d -XOverloadedStrings src/Examples.hs
+:m + Control.Lens Control.Applicative Control.Monad Data.Char
+
+* constructing lenses
+** Constructing a lens by hand, convenience api
+** Constructing a lens by hand
+** Remove hand lenses with makeLenses
+** view / over / set
+let p = Point 1 2
+view x p
+view y p
+set x 9 p
+over x (5 +) p
+** operators
+p ^. x
+p ^. y
+:t y .~ 9
+(y .~ 9) p
+y .~ 9 $ p
+:t (&)
+:t ($)
+p & y .~ 9
+p & y %~ (+9)
+* composing lenses
+** makeIso / makeLenses
+** constructing an iso by hand
+** creating some data
+
+let wheel = Group (I 0) "wheel"
+let operator = Group (I 5) "operator"
+let lusers = Group (I 500) "users"
+let root = User (I 0) "root" wheel [] "6aefd2842be62cd470709b27aedc7db7" "/bin/sh"
+let mth =  User (I 3365) "mth" lusers [wheel, operator] "6aefd2842be62cd470709b27aedc7db7" "/usr/local/bin/zsh"
+let fred = User (I 4000) "fred" lusers [] "30c6677b833454ad2df762d3c98d2409" "/bin/sh"
+let wilma = User (I 4001) "wilma" lusers [operator] "30c6677b833454ad2df762d3c98d2409" "/bin/sh"
+let users = [root, mth, fred, wilma]
+
+** navigate around that data
+
+-- iso flipped is from
+(I 7) ^. from i
+
+-- isomorphism laws
+(I 7) ^. from i . i
+
+-- setter from iso
+(I 7) & from i .~ 11
+
+-- composition
+mth ^. primary
+mth ^. primary . gid
+mth ^. primary . gid . from i
+mth & primary . gid . from i .~ 3366
+mth ^. primary . groupname
+mth ^. primary . groupname . to tail
+
+-- traveral
+users ^? _head . primary . gid
+users & traverse . uid . from i %~ (1+)
+
+-- multi update
+wheel & gid . from i .~ 1 & groupname .~ "daemon"
+
+-- get multiple vales, Getter's form an applicative, just ((->) t)
+wheel & isWheel <$> view (gid . from i) <*> view groupname
+
+** classy composition (maybe don't do this, but it is interesting sometimes)
+
+mth ^?  primary . gid
+mth ^?  gid
+
+(a better example might be simulating extensible records (poorly))
+
+** prims / partiality
+1 ^? even'
+(1, 2) & both %~ (+10)
+(1, 2) & both . even' %~ (+10)
+(1, 2) & both . even' .from evens %~ (+10)
+
+** pattern matching
+let xx = (Rectangle 5 3)
+:m + Data.Maybe
+fromMaybe (xx ^. _Rectangle)  $ xx ^? _Square
+
+
+** printers and parsers
+review aeson (1, 2)
+preview aeson "[1, 2, 3]" :: Maybe [Int]
+
+
+* setup
+:q
+ghci -package-db .cabal-sandbox/x86_64-osx-ghc-7.6.1-packages.conf.d -XOverloadedStrings src/Js.hs
+:m + Control.Lens Control.Applicative Control.Monad Data.Char
+
+** explore
+
+look $ \js -> js & nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn . _JSVarDecl . _1 . nn . _JSIdentifier .~ "fred"
+
+look $ \js -> js ^? nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn . _JSVarDecl . _1 . nn . _JSIdentifier
+
+check $ \js -> js & nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn . _JSVarDecl . _1 . nn . _JSIdentifier .~ "fred"
+
+refactor $ \js -> js & nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn . _JSVarDecl . _1 . nn . _JSIdentifier .~ "roger"
