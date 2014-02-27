@@ -19,13 +19,13 @@ data Point =
     , _y :: Int
     } deriving (Eq, Show)
 
-x :: Lens' Point Int
-x = lens _x $ \p i -> p { _x = i }
+--x :: Lens' Point Int
+--x = lens _x $ \p i -> p { _x = i }
 
-y :: Lens' Point Int
-y f p = (\i -> p { _y = i}) <$> f (_y p)
+--y :: Lens' Point Int
+--y f p = (\i -> p { _y = i}) <$> f (_y p)
 
--- makeLenses ''Point
+makeLenses ''Point
 
 
 -- ##################################
@@ -52,31 +52,38 @@ data Group =
     } deriving (Eq, Show)
 
 
-makeIso ''Ident
-makeLenses ''Group
-makeLenses ''User
+--makeIso ''Ident
+--makeLenses ''Group
+--makeLenses ''User
 
-{-
 i :: Iso' Int Ident
 i = iso I runIdent
--}
 
 
 md5sum :: String -> String
 md5sum = show . md5 . C8.pack
 
 -- plaintext :: (String -> Identity String) -> User -> User
-plaintext :: Setter' User String
-plaintext f u = (\p -> u { _password = md5sum p })   <$> f (u^.password)
+--plaintext :: Setter' User String
+--plaintext f u = (\p -> u { _password = md5sum p })   <$> f (u^.password)
+
+data Simpley =
+  Simpley String
+
+data Extra =
+  Extra Int Simpley
+
 
 isWheel :: Int -> String -> Bool
 isWheel n s = n == 0 && s == "wheel"
 
-{--
 makeClassy ''Group
 makeClassy ''User
+
 instance HasGroup User where
   group = primary
+
+{--
 --}
 
 

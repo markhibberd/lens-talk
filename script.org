@@ -93,7 +93,7 @@ mth ^. primary . groupname
 mth ^. primary . groupname . to tail
 
 -- traveral
-users ^? _head . primary . gid
+[] ^? _head . primary . gid
 users & traverse . uid . from i %~ (1+)
 
 -- multi update
@@ -104,7 +104,7 @@ wheel & isWheel <$> view (gid . from i) <*> view groupname
 
 -- virtual views - setter only - maintain composition
 
-mth & plaintext .~ "apple"
+:t plaintext .~ "apple"
 
 mth ^. plaintext
 
@@ -123,7 +123,7 @@ Left 5 & _Left %~ (+5)
 5^.re _Left
 
 ** more prisms / partiality
-1 ^? even'
+2 ^? even'
 (1, 2) & both %~ (+10)
 (1, 2) & both . even' %~ (+10)
 (1, 2) & both . even' .from evens %~ (+10)
@@ -182,3 +182,6 @@ look "demo.js" $ \js -> js & nn . _JSSourceElementsTop . _head . nn . _JSVariabl
 check "demo.js" $ \js -> js & nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn . _JSVarDecl . _1 . nn . _JSIdentifier .~ "fred"
 
 refactor "demo.js" $ \js -> js & nn . _JSSourceElementsTop . _head . nn . _JSVariables . _2 . _head . nn . _JSVarDecl . _1 . nn . _JSIdentifier .~ "fred"
+
+
+head . tail $ [1, 2, 3]
