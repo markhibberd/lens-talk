@@ -12,4 +12,4 @@ The most interesting pieces of code are:
  - The JavaScript refactoring tool: [Js.hs](https://github.com/markhibberd/lens-talk/blob/master/src/Js.hs)
 
 
-<README.html>
+<http://README.html>
