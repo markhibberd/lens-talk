@@ -10,3 +10,6 @@ To follow along, I basically worked through the code and examples in [script.org
 The most interesting pieces of code are:
  - The basic _van Laarhoven lens_ implementation: [Van.hs](https://github.com/markhibberd/lens-talk/blob/master/src/Van.hs)
  - The JavaScript refactoring tool: [Js.hs](https://github.com/markhibberd/lens-talk/blob/master/src/Js.hs)
+
+
+<README.md>
